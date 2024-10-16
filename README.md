@@ -12,7 +12,7 @@ Promul is intended to be a free and open-source alternative to [Unity Relay](htt
 
 ## Setup
 #### Relay server and API
-Clone this repository and build and run the program under [/Server](/Server). The relay server will bind on UDP port 4098 while the API server will bind on TCP port 3000.
+Clone this repository and build and run the program under [/src/Promul.Server~](/src/Promul.Server~) or build and run the provided docker image. The relay server will bind on UDP port 4098 while the API server will bind on TCP port 3000.
 
 To create a new session, call `PUT /session/create`. The API will respond with the join code.
 

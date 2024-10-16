@@ -69,4 +69,29 @@ public class IntegrationTests
         var invalidJoin = await client.PutAsync("/session/join", JsonContent.Create(new { joinCode = "invalid" }));
         Assert.That(invalidJoin.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
     }
+
+    [Test]
+    public async Task Test_Destroy_Created_Session()
+    {
+        var client = _factory.CreateClient();
+        var rs = _factory.Services.GetRequiredService<RelayServer>();
+        Assert.That(rs.GetAllSessions(), Is.Empty);
+        var response = await client.PutAsync("/session/create", null);
+        response.EnsureSuccessStatusCode();
+        var r = await response.Content.ReadFromJsonAsync<SessionInfo>();
+        Assert.That(r.JoinCode, Is.Not.Empty);
+        Assert.That(rs.GetAllSessions(), Has.Count.EqualTo(1));
+
+        // Override Destroy Enviroment Variable
+        System.Environment.SetEnvironmentVariable("ENABLE_DESTROY_API", "true");
+
+        var request = new HttpRequestMessage {
+            Method = HttpMethod.Delete,
+            RequestUri = new Uri("/session/destroy"),
+            Content = JsonContent.Create(new { joinCode = r.JoinCode })
+        };
+        var removeResponse = await client.SendAsync(request);
+        removeResponse.EnsureSuccessStatusCode();
+        Assert.That(rs.GetAllSessions(), Has.Count.EqualTo(0));
+    }
 }
